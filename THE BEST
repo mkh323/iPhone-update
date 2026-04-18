@@ -1,0 +1,129 @@
+<script>
+function createSpinner() {
+  const spinner = document.getElementById("spinner");
+  for (let i = 0; i < 12; i++) {
+    const bar = document.createElement("div");
+    bar.style.transform = `rotate(${i * 30}deg) translateY(-10px)`;
+    bar.style.animationDelay = `${i * 0.1}s`;
+    spinner.appendChild(bar);
+  }
+}
+
+function startPrank() {
+  document.getElementById("tapOverlay").style.display = "none";
+  goFullscreen();
+  startVibration();
+  disableTouch();
+
+  // timeline starts after initial animation (~4s)
+  setTimeout(fakeProgressSequence, 5000);
+}
+
+/* ===== FAKE PROGRESS FLOW ===== */
+function fakeProgressSequence() {
+  const progress = document.querySelector(".progress");
+  const text = document.querySelector(".text");
+
+  // jump to 80%
+  setTimeout(() => {
+    progress.style.width = "80%";
+    text.innerText = "About 30 minutes remaining";
+  }, 10000);
+
+  // jump to 90%
+  setTimeout(() => {
+    progress.style.width = "90%";
+    text.innerText = "About 10 minutes remaining";
+  }, 20000);
+
+  // jump to 100%
+  setTimeout(() => {
+    progress.style.width = "100%";
+    text.innerText = "Finalizing update...";
+  }, 30000);
+
+  // verifying
+  setTimeout(() => {
+    text.innerText = "Verifying Update...";
+  }, 38000);
+
+  // fake data recovery panic
+  setTimeout(() => {
+    text.innerText = "Attempting Data Recovery...";
+  }, 46000);
+
+  // FAIL 😈
+  setTimeout(triggerFailure, 60000);
+}
+
+/* ===== FAILURE ===== */
+function triggerFailure() {
+  const text = document.querySelector(".text");
+  text.innerText = "Update Failed";
+
+  // short delay → reboot
+  setTimeout(rebootScreen, 3000);
+}
+
+/* ===== REBOOT LOOP ===== */
+function rebootScreen() {
+  document.body.innerHTML = `
+    <div id="bootScreen" style="
+      background:black;
+      display:flex;
+      justify-content:center;
+      align-items:center;
+      height:100vh;
+      flex-direction:column;
+      color:white;
+    ">
+      <svg width="90" viewBox="0 0 814 1000" fill="white">
+        <path d="M788 743c-15 35-33 67-54 96-28 38-51 64-69 78-27 22-55 33-84 34-21 0-46-6-76-18-29-12-56-18-80-18-25 0-52 6-82 18-30 12-54 18-72 19-28 1-57-11-86-35-19-16-43-43-72-82-31-41-57-88-77-140-21-55-31-108-31-157 0-56 12-104 37-145 19-32 44-57 75-75 31-18 64-27 99-27 23 0 52 7 87 20 35 13 58 20 69 20 8 0 35-8 79-24 42-15 78-22 108-20 81 7 141 39 180 96-73 44-109 106-108 185 1 62 23 114 67 155 20 19 43 33 69 43-5 14-10 28-17 42zM548 0c0 49-18 95-53 138-42 51-93 80-148 75-1-6-1-12-1-19 0-47 20-97 56-138 18-21 41-38 69-51 27-12 53-19 77-20 1 6 1 11 1 15z"/>
+      </svg>
+      <div style="margin-top:20px;color:#aaa;font-size:14px;">
+        Attempting restart...
+      </div>
+    </div>
+  `;
+
+  startBootLoop();
+}
+
+/* ===== LOOP EFFECT ===== */
+function startBootLoop() {
+  setInterval(() => {
+    const screen = document.getElementById("bootScreen");
+    if (!screen) return;
+
+    screen.style.opacity = "0";
+
+    setTimeout(() => {
+      screen.style.opacity = "1";
+    }, 800);
+
+  }, 4000);
+}
+
+/* ===== TOUCH DISABLE ILLUSION ===== */
+function disableTouch() {
+  document.body.addEventListener("touchstart", e => e.preventDefault(), { passive: false });
+  document.body.addEventListener("click", e => e.preventDefault());
+}
+
+/* ===== FULLSCREEN + VIBRATION ===== */
+function goFullscreen() {
+  let el = document.documentElement;
+  if (el.requestFullscreen) el.requestFullscreen();
+  else if (el.webkitRequestFullscreen) el.webkitRequestFullscreen();
+}
+
+function startVibration() {
+  if (navigator.vibrate) {
+    setInterval(() => {
+      navigator.vibrate([200, 100, 200]);
+    }, 4000);
+  }
+}
+
+createSpinner();
+</script>
